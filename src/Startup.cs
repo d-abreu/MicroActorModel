@@ -1,6 +1,12 @@
-public class Startup{
+using System.Collections.Generic;
 
-    public static void Main(){
+public class Startup
+{
 
+    public static void Main()
+    {
+        var actorSystem = new ActorSystem();
     }
 }
+
+
