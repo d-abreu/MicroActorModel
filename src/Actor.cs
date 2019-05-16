@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 public abstract class Actor : IActor
 {
-    private Dictionary<Type, dynamic> TypeHandlers {get;} = new Dictionary<Type, dynamic>();
+    private Dictionary<Type, dynamic> TypeHandlers { get; } = new Dictionary<Type, dynamic>();
     internal IActor Parent { get; set; }
     internal ActorSystem System { get; set; }
     internal BlockingCollection<dynamic> Mailbox { get; } = new BlockingCollection<dynamic>();
@@ -14,12 +14,12 @@ public abstract class Actor : IActor
         StartReceiving();
     }
 
-    protected IActor CreateActor<T>() where T: Actor
+    protected IActor CreateActor<T>() where T : Actor
     {
-        return System.CreateChildActor(typeof(T),this);
+        return System.CreateChildActor(typeof(T), this);
     }
 
-    protected void Handles<T>(Action<T> messageHandler) where T: class
+    protected void Handles<T>(Action<T> messageHandler) where T : class
     {
         var tst = (dynamic)messageHandler;
         this.TypeHandlers.Add(typeof(T), tst);
@@ -31,6 +31,12 @@ public abstract class Actor : IActor
         {
             foreach (var msg in Mailbox.GetConsumingEnumerable())
             {
+                if(!TypeHandlers.ContainsKey(msg.GetType()))
+                {
+                    System.UnhandledMessages.Tell(new ActorSystem.UnhandledMessage(){ Message = msg } );
+                    continue;
+                }
+
                 try
                 {
                     TypeHandlers[msg.GetType()](msg);

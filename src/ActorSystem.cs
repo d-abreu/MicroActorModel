@@ -6,16 +6,17 @@ internal class ActorSystem
 {
     private Dictionary<Actor, BlockingCollection<object>> Mailboxes { get; }
     = new Dictionary<Actor, BlockingCollection<object>>();
-    public IActor root { get; }
-
+    internal IActor Root { get; }
+    internal IActor UnhandledMessages { get;}
     public ActorSystem()
     {
-        root = CreateActor<RootActor>();
+        Root = CreateActor<RootActor>();
+        UnhandledMessages = CreateChildActor(typeof(UnhandledMessagesActor), Root);
     }
 
     public IActor CreateActor<T>() where T : Actor
     {
-        return CreateChildActor(typeof(T), root);
+        return CreateChildActor(typeof(T), Root);
     }
     internal IActor CreateChildActor(Type actorType, IActor parent)
     {
@@ -30,4 +31,17 @@ internal class ActorSystem
     {
 
     } 
+
+    private class UnhandledMessagesActor : Actor
+    {
+        public UnhandledMessagesActor()
+        {
+            Handles<UnhandledMessage>(obj => Console.WriteLine($"Unhandled message: {obj.Message}"));
+        }
+    }
+
+    internal class UnhandledMessage
+    {
+        public object Message {get;set;}
+    }
 }

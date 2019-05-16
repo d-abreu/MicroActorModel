@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public class Startup
 {
@@ -9,10 +10,11 @@ public class Startup
         var actorSystem = new ActorSystem();
         var ceo = actorSystem.CreateActor<Ceo>();
 
-        for (int i = 0; i <= 20; i++)
-        {
+        Parallel.For(0,31,(i) => {
             ceo.Tell("msgNr. " + i);
-        }
+        });
+
+        ceo.Tell(new {a = 5});
 
         Console.WriteLine("Click ENTER to close");
         Console.ReadLine();
@@ -41,7 +43,7 @@ public class Junior : Actor
         {
             if(obj.Contains("13"))
                 throw new Exception("Junior failed");
-            Console.WriteLine($"{this.GetType().Name} received {obj}");
+            Console.WriteLine($"{nameof(Junior)} received {obj}");
         });
     }
 }
